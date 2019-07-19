@@ -24,7 +24,7 @@ def try_scalar(val):
 
 def parse_rasx_metadata(xml):
     mdata = dict()
-    xml.seek(0)
+    #xml.seek(0)
     tree = ET.parse(xml)
     measurement = tree.getroot()
 
@@ -48,7 +48,13 @@ def parse_rasx_metadata(xml):
 
 
     distances = hwdict["distances"] = []
-    Distance = collections.namedtuple("Distance", ("To", "From", "Unit", "Value"), defaults=4*[None])
+    
+    ## python >= 3.7:
+    #Distance = collections.namedtuple("Distance", ("To", "From", "Unit", "Value"), defaults=4*[None])
+    ## python < 3.7:
+    Distance = collections.namedtuple('Distance', ("To", "From", "Unit", "Value"))
+    Distance.__new__.__defaults__ = (None,) * len(Distance._fields)
+
     for distance in hwconf.find("Distances"):
         attrib = distance.attrib.copy()
         attrib["Value"] = try_scalar(attrib["Value"])
@@ -70,10 +76,14 @@ def parse_rasx_metadata(xml):
         else:
             header[key] = pair[1].text
 
+    ## python >= 3.7:
+    #Axis = collections.namedtuple("Axis",
+    #                              ("Name", "Unit", "Offset", "Position", "Description"),
+    #                              defaults=5*[None])
+    ## python < 3.7:
+    Axis = collections.namedtuple('Axis', ("Name", "Unit", "Offset", "Position", "Description"))
+    Axis.__new__.__defaults__ = (None,) * len(Axis._fields)
 
-    Axis = collections.namedtuple("Axis",
-                                  ("Name", "Unit", "Offset", "Position", "Description"),
-                                  defaults=5*[None])
     axes = mdata["Axes"] = collections.OrderedDict()
     for i, axis in enumerate(measurement.find("Axes")):
         attrib = axis.attrib.copy()

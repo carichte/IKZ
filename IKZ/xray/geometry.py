@@ -94,7 +94,26 @@ class ID01psic(EmptyGeometry):
         super(ID01psic, self).__init__(**kwargs)
 
 
+class P23SixC(EmptyGeometry):
+    def __init__(self, **kwargs):
+        ### geometry of diffractometer
+        ### x downstream; z upwards; y to the "outside" (righthanded)
+        ### maintain the correct order: outer to inner rotation!
+        self.sample_rot['omega_t'] = 'y-' # check mu is not 0
+        self.sample_rot['mu'] = 'z-' # check mu is not 0
+        self.sample_rot['omega'] = 'y-'
+        self.sample_rot['chi'] = 'x-'
+        self.sample_rot['phi'] = 'y+'
 
+        self.detector_rot['gamma'] = 'z-'
+        self.detector_rot['delta'] = 'y-'
+
+        self.inc_beam = [1,0,0]
+
+        # defines whether these motors are used. otherwise set to zero
+        #   typical defaults, can be overridden during __init__:
+        self.usemotors = set(('omega', 'chi', 'phi', 'gamma', 'delta'))
+        super(P23SixC, self).__init__(**kwargs)
 
 class SmartLab(EmptyGeometry):
     def __init__(self, **kwargs):

@@ -107,7 +107,7 @@ class RASXfile(object):
             meta = []
             for i in range(numscans):
                 if verbose and not i:
-                    print("Loading frame %i"%i, end="")
+                    print("Loading profile %i"%i, end="")
                 if verbose and i:
                     print(", %i"%i, end="")
                 profile = profiles[i]
@@ -123,10 +123,32 @@ class RASXfile(object):
                     data.append(np.loadtxt(_content))
                 with fh.open(metafile) as xml:
                     meta.append(parse_rasx_metadata(xml))
+
+            images = [f.filename for f in fh.filelist if "Image" in f.filename]
+            numimg = len(images)
+            imgdata = []
+            for i in range(numimg):
+                if verbose and not i:
+                    print("Loading frame %i"%i, end="")
+                if verbose and i:
+                    print(", %i"%i, end="")
+                imgpath = images[i]
+                metafile = imgpath.replace("Image", "MesurementConditions")
+                metafile = metafile[:-4] + ".xml"
+                #print(fname)
+                
+                with fh.open(imgpath) as f:
+                    imgarr = np.fromstring(f.read(), dtype=np.uint32)
+                    imgarr.resize(385, 775) # for now only Hypix3000
+                    imgdata.append(imgarr)
+                with fh.open(metafile) as xml:
+                    meta.append(parse_rasx_metadata(xml))
+
             if verbose:
                 print()
 
-        self.data = np.stack(data)
+        self.data = np.stack(data) if data else []
+        self.images = np.stack(imgdata) if imgdata else []
         self._meta = meta
         self.positions = collections.defaultdict(list)
         for mdata in meta:
@@ -137,7 +159,6 @@ class RASXfile(object):
                 self.positions[axis] = self.positions[axis][0]
             else:
                 self.positions[axis] = np.array(self.positions[axis])
-
 
     def get_RSM(self):
         tth, I, _ = self.data.transpose(2,0,1).squeeze()

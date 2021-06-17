@@ -83,7 +83,20 @@ def parse_rasx_metadata(xml):
     #                              ("Name", "Unit", "Offset", "Position", "Description"),
     #                              defaults=5*[None])
     ## python < 3.7:
-    Axis = collections.namedtuple('Axis', ("Name", "Unit", "Offset", "Position", "EndPosition", "Description", "State", "Resolution"))
+    Axis = collections.namedtuple('Axis',
+                                  ("Name",
+                                   "Unit",
+                                   "Offset",
+                                   "Position",
+                                   "EndPosition",
+                                   "Description",
+                                   "State",
+                                   "Resolution",
+                                   "Speed",
+                                   "SpeedUnit",
+                                   "SpeedResolution",
+                                   "OscillationWidth",
+                                   ))
     Axis.__new__.__defaults__ = (None,) * len(Axis._fields)
 
     axes = mdata["Axes"] = collections.OrderedDict()
@@ -92,6 +105,11 @@ def parse_rasx_metadata(xml):
         attrib["Description"] = axtitle[i]
         for key in ("Offset", "Position"):
             attrib[key] = try_scalar(attrib.get(key))
+        attrib = dict([_i for _i in attrib.items() if _i[0] in Axis._fields])
+        if len(attrib) < len(axis.attrib):
+            missing = set(axis.attrib).difference(set(attrib))
+            for key in missing:
+                print("Warning: unknown axis attribute: %s"%k)
         axes[axis.attrib["Name"]] = Axis(**attrib)
 
         
@@ -147,8 +165,13 @@ class RASXfile(object):
             if verbose:
                 print()
 
-        self.data = np.stack(data) if data else []
-        self.images = np.stack(imgdata) if imgdata else []
+        try:
+            data = np.stack(data)
+            imgdata = np.stack(imgdata)
+        except:
+            pass
+        self.data = data
+        self.images = imgdata
         self._meta = meta
         self.positions = collections.defaultdict(list)
         for mdata in meta:

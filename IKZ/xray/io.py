@@ -4,6 +4,7 @@
 from __future__ import print_function
 import zipfile
 import os
+import sys
 import xml.etree.ElementTree as ET
 import xmltodict
 import collections
@@ -112,7 +113,7 @@ def parse_rasx_metadata(xml):
                 print("Warning: unknown axis attribute: %s"%k)
         axes[axis.attrib["Name"]] = Axis(**attrib)
 
-        
+
     return mdata
 
 
@@ -124,10 +125,10 @@ class RASXfile(object):
             data = []
             meta = []
             for i in range(numscans):
-                if verbose and not i:
-                    print("Loading profile %i"%i, end="")
-                if verbose and i:
-                    print(", %i"%i, end="")
+                if verbose:
+                    if not i:
+                        print("Loading profiles...")
+                    sys.stdout.write("\r%5i/%i"%(i+1, numscans))
                 profile = profiles[i]
                 metafile = profile.replace("Profile", "MesurementConditions")
                 metafile = metafile[:-4] + ".xml"
@@ -146,15 +147,15 @@ class RASXfile(object):
             numimg = len(images)
             imgdata = []
             for i in range(numimg):
-                if verbose and not i:
-                    print("Loading frame %i"%i, end="")
-                if verbose and i:
-                    print(", %i"%i, end="")
+                if verbose:
+                    if not i:
+                        print("Loading frames...")
+                    sys.stdout.write("\r%5i/%i"%(i+1, numimg))
                 imgpath = images[i]
                 metafile = imgpath.replace("Image", "MesurementConditions")
                 metafile = metafile[:-4] + ".xml"
                 #print(fname)
-                
+
                 with fh.open(imgpath) as f:
                     imgarr = np.fromstring(f.read(), dtype=np.uint32)
                     imgarr.resize(385, 775) # for now only Hypix3000
@@ -165,11 +166,9 @@ class RASXfile(object):
             if verbose:
                 print()
 
-        try:
-            data = np.stack(data)
-            imgdata = np.stack(imgdata)
-        except:
-            pass
+        data = np.array(data)
+        imgdata = np.array(imgdata)
+
         self.data = data
         self.images = imgdata
         self._meta = meta
@@ -184,9 +183,13 @@ class RASXfile(object):
                 self.positions[axis] = np.array(self.positions[axis])
 
     def get_RSM(self):
-        tth, I, _ = self.data.transpose(2,0,1).squeeze()
-        output = dict(TwoTheta=tth, Intensity=I)
-        for axis in ["Omega", "Chi", "Phi"]:
+        pos, I, _ = self.data.transpose(2,0,1).squeeze()
+        output = dict(Intensity=I)
+        mot = self._meta[0]["ScanInformation"]["AxisName"]
+        output[mot] = pos
+        for axis in ["Omega", "Chi", "Phi", "TwoTheta", "TwoThetaChi"]:
+            if axis in output:
+                continue
             axdata = self.positions[axis]
             if np.ndim(axdata):
                 axdata = axdata[:,None] * np.ones_like(I)
@@ -201,7 +204,7 @@ class BRMLfile(object):
         with zipfile.ZipFile(path, 'r') as fh:
             experiment = "Experiment%i"%exp_nbr
             datacontainer = "%s/DataContainer.xml"%experiment
-            
+
             with fh.open(datacontainer, "r") as xml:
                 data = xmltodict.parse(xml.read(), encoding=encoding)
             rawlist = data["DataContainer"]["RawDataReferenceList"]["string"]

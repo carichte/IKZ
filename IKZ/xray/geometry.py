@@ -49,7 +49,6 @@ class EmptyGeometry(object):
 
 class P08kohzu(EmptyGeometry):
     def __init__(self, **kwargs):
-        ### geometry of ID01 diffractometer
         ### x downstream; z upwards; y to the "outside" (righthanded)
         ### the order matters!
         self.sample_rot['omh'] = 'z+' # check mu is not 0
@@ -118,7 +117,6 @@ class P23SixC(EmptyGeometry):
 
 class SmartLab(EmptyGeometry):
     def __init__(self, **kwargs):
-        ### geometry of ID01 diffractometer
         ### x downstream; z upwards; y to the "outside" (righthanded)
         ### the order matters!
         self.sample_rot['Omega'] = 'y-'
@@ -138,5 +136,27 @@ class SmartLab(EmptyGeometry):
                               'TwoTheta',
                               'TwoThetaChi'))
         super(SmartLab, self).__init__(**kwargs)
+
+class BrukerD8(EmptyGeometry):
+    def __init__(self, **kwargs):
+        ### x downstream; z upwards; y to the "outside" (righthanded)
+        ### the order matters!
+        self.sample_rot['Theta'] = 'y-'
+        self.sample_rot['Chi'] = 'x+' # cross check 
+        self.sample_rot['Phi'] = 'z+'
+
+        self.detector_rot['TwoTheta'] = 'y-'
+
+        self.inc_beam = [1,0,0]
+
+        # defines whether these motors are used. otherwise set to zero
+        #   typical defaults, can be overridden during __init__:
+        self.usemotors = set(('Theta',
+                              'Phi',
+                              'Chi',
+                              'TwoTheta'
+                              ))
+        super(BrukerD8, self).__init__(**kwargs)
+
 
 

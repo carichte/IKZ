@@ -12,6 +12,7 @@ setup(
     author_email='carsten.richter@ikz-berlin.de',
     url='',
     packages = ['IKZ.xray',
+                'IKZ.plot',
                 ],
 #    package_data = {
 #       "IKZ": ["media/*"]},

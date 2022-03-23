@@ -49,24 +49,26 @@ class EmptyGeometry(object):
 
 class P08kohzu(EmptyGeometry):
     def __init__(self, **kwargs):
+        ### geometry of PETRA P08 diffractometer
         ### x downstream; z upwards; y to the "outside" (righthanded)
         ### the order matters!
         self.sample_rot['omh'] = 'z+' # check mu is not 0
-        self.sample_rot['om'] = 'y+'
+        self.sample_rot['om'] = 'y-'
         self.sample_rot['chi'] = 'x+'
-        self.sample_rot['phis'] = 'z+'
-        self.sample_rot['goni1'] = 'y+'
+        self.sample_rot['phis'] = 'y-'
+        self.sample_rot['goni1'] = 'z+'
         self.sample_rot['goni2'] = 'x+'
         
         self.detector_rot['tth'] = 'z+'
-        self.detector_rot['tt'] = 'y+'
+        self.detector_rot['tt'] = 'y-'
         
-        self.inc_beam = [-1,0,0]
+        self.inc_beam = [1,0,0]
         
         # defines whether these motors are used. otherwise set to zero
         #   typical defaults, can be overridden during __init__:
         self.usemotors = set(('om', 'chi', 'phis', 'tth', 'tt'))
         super(P08kohzu, self).__init__(**kwargs)
+
 
 
 

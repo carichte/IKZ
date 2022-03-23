@@ -6,6 +6,10 @@
 import numpy as np
 from matplotlib.patches import Polygon
 norm = np.linalg.norm
+sqrt2pi = np.sqrt(2*np.pi)
+
+stdnorm = lambda x, sigma: np.exp(-(x/sigma)**2/2)/sigma/sqrt2pi
+
 
 class LineCut:
     '''Allow user to drag a line on a pcolor/pcolormesh plot, and plot the Z values from that line on a separate axis.
@@ -105,11 +109,10 @@ class LineCut:
             vec_perp /=np.linalg.norm(vec_perp)
 
             w = self.integrate_width
-            for i in np.linspace(-w/2, w/2, 2*w-1):
+            for i in np.linspace(-3*w, 3*w, 6*w+1):
                 _cols = cols + vec_perp[0]*i
                 _rows = rows + vec_perp[1]*i
-                zi += self.data[_cols.round().astype(np.int), _rows.round().astype(np.int)]
-            zi /= 2*w-1
+                zi += self.data[_cols.round().astype(np.int)-1, _rows.round().astype(np.int)-1] * stdnorm(i, w)
             
             col_min = cols - vec_perp[0]*w/2
             col_max = cols + vec_perp[0]*w/2

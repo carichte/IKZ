@@ -146,6 +146,8 @@ class RASXfile(object):
 
             images = [f.filename for f in fh.filelist if "Image" in f.filename]
             numimg = len(images)
+
+
             imgdata = []
             for i in range(numimg):
                 if verbose:
@@ -157,12 +159,19 @@ class RASXfile(object):
                 metafile = metafile[:-4] + ".xml"
                 #print(fname)
 
-                with fh.open(imgpath) as f:
-                    imgarr = np.fromstring(f.read(), dtype=np.uint32)
-                    imgarr.resize(385, 775) # for now only Hypix3000
-                    imgdata.append(imgarr)
                 with fh.open(metafile) as xml:
                     meta.append(parse_rasx_metadata(xml))
+                optics = meta[-1]["HardwareConfig"]["optics"]
+                if optics["Detector"] == 'HyPix3000(H)':
+                    det_shape = 385, 775
+                elif optics["Detector"] == 'HyPix3000(V)':
+                    det_shape = 775, 385
+                else:
+                    det_shape = -1,
+                with fh.open(imgpath) as f:
+                    imgarr = np.fromstring(f.read(), dtype=np.uint32)
+                    imgarr.resize(det_shape)
+                    imgdata.append(imgarr)
 
             if verbose:
                 print()

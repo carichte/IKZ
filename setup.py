@@ -24,6 +24,7 @@ setup(
     install_requires=[
                       'numpy',
                       'xrayutilities',
+                      'xmltodict',
                       #'matplotlib',
                       #'scipy',
                       #'h5py',

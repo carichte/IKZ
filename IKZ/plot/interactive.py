@@ -5,6 +5,10 @@
 
 import numpy as np
 from matplotlib.patches import Polygon
+from matplotlib.widgets import RectangleSelector
+from ipywidgets import Button, VBox, HBox
+from IPython.display import display
+
 norm = np.linalg.norm
 sqrt2pi = np.sqrt(2*np.pi)
 
@@ -173,5 +177,78 @@ class LineCut:
         self.ax.relim()
         self.ax.autoscale_view()
         self.ax.set_xlabel(xlabel)
+
+
+class ROIselector(object):
+    """
+        A ROI-selector for Jupyter Notebooks:
+        
+        ```
+            fig, ax = plt.subplots(1, 1)
+            ax.imshow(myimage)
+            RS = ROIselector(ax)
+            print(RS.rois)
+        ```
+    """
+    def __init__(self, axes, maxrois=10, roicolor="orange"):
+        self.ax = axes
+        self.maxrois = 10
+        self.rois = dict()
+        self._roiplots = dict()
+        self.roicolor = roicolor
+
+        self.addbutton = Button(description='Add Region')
+        self.addbutton.on_click(self.addroi)
+        self.undobutton = Button(description='Clear Last Region')
+        self.undobutton.on_click(self.clear_last_rois)
+        self.clrbutton = Button(description='Clear Regions')
+        self.clrbutton.on_click(self.clear_rois)
+
+        self.rect = RectangleSelector(self.ax, lambda : None,
+                                      drawtype='box', useblit=True,
+                                      button=[1, 3],  # don't use middle button
+                                      minspanx=5, minspany=5,
+                                      spancoords='pixels',
+                                      interactive=True)
+        self.buttons = self.addbutton, self.undobutton, self.clrbutton
+        display(HBox(self.buttons))
+
+    def addroi(self, button):
+        iroi = len(self.rois)+1
+        rname = "roi_%02i"%iroi
+        'eclick and erelease are the press and release events'
+        x1, x2, y1, y2 = list(map(int, self.rect.extents))
+        print("(%i, %i) --> (%i, %i)" % (x1, y1, x2, y2))
+        self.rois[rname] = np.s_[y1:y2, x1:x2]
+        box_x = [x1, x2, x2, x1, x1]
+        box_y = [y1, y1, y2, y2, y1]
+        imark,jmark = min(box_x), max(box_y)
+        c = self.roicolor
+        line, = self.ax.plot(box_x, box_y, "-", ms=1, color=c, alpha=0.71)
+        lbl = self.ax.annotate(rname, (imark, jmark), color=c)
+        self._roiplots[rname] = (line, lbl)
+
+    def clear_last_rois(self, button):
+        iroi = len(self.rois)
+        if not iroi>0:
+            return
+        rname = "roi_%02i"%iroi
+        self.rois.pop(rname)
+        line, lbl = self._roiplots.pop(rname)
+        self.ax.lines.remove(line)
+        self.ax.texts.remove(lbl)
+        self.ax.figure.canvas.draw()
+
+    def clear_rois(self, button):
+        self.rois.clear()
+        for rname in self._roiplots:
+            line, lbl = self._roiplots[rname]
+            self.ax.lines.remove(line)
+            self.ax.texts.remove(lbl)
+        self._roiplots.clear()
+        self.ax.figure.canvas.draw()
+        
+        
+
 
 

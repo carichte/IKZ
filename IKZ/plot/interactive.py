@@ -118,10 +118,10 @@ class LineCut:
                 _rows = rows + vec_perp[1]*i
                 zi += self.data[_cols.round().astype(np.int)-1, _rows.round().astype(np.int)-1] * stdnorm(i, w)
             
-            col_min = cols - vec_perp[0]*w/2
-            col_max = cols + vec_perp[0]*w/2
-            row_min = rows - vec_perp[1]*w/2
-            row_max = rows + vec_perp[1]*w/2
+            col_min = cols - vec_perp[0]*w*2
+            col_max = cols + vec_perp[0]*w*2
+            row_min = rows - vec_perp[1]*w*2
+            row_max = rows + vec_perp[1]*w*2
             x0min, x1min = col_min[[0,-1]].round().astype(int)
             x0max, x1max = col_max[[0,-1]].round().astype(int)
             y0min, y1min = row_min[[0,-1]].round().astype(int)

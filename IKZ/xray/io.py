@@ -181,7 +181,7 @@ class RASXfile(object):
 
         self.data = data
         self.images = imgdata
-        self._meta = meta
+        self.meta = meta
         self.positions = collections.defaultdict(list)
         for mdata in meta:
             for axis in mdata["Axes"].values():
@@ -195,7 +195,7 @@ class RASXfile(object):
     def get_RSM(self):
         pos, I, _ = self.data.transpose(2,0,1).squeeze()
         output = dict(Intensity=I)
-        mot = self._meta[0]["ScanInformation"]["AxisName"]
+        mot = self.meta[0]["ScanInformation"]["AxisName"]
         output[mot] = pos
         for axis in ["Omega", "Chi", "Phi", "TwoTheta", "TwoThetaChi"]:
             if axis in output:
@@ -206,6 +206,14 @@ class RASXfile(object):
             output[axis] = axdata
 
         return output
+    
+    def get_starttime(self, idx=0, to_seconds=True):
+        starttime = self.meta[idx]["ScanInformation"]["StartTime"]
+        parsed_time = time.strptime(starttime, "%Y-%m-%dT%H:%M:%SZ")
+        if to_seconds:
+            return time.mktime(parsed_time)
+        else:
+            return parsed_time
 
 
 class BRMLfile(object):

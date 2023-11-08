@@ -116,7 +116,7 @@ class LineCut:
             for i in np.linspace(-3*w, 3*w, 6*w+1):
                 _cols = cols + vec_perp[0]*i
                 _rows = rows + vec_perp[1]*i
-                zi += self.data[_cols.round().astype(np.int)-1, _rows.round().astype(np.int)-1] * stdnorm(i, w)
+                zi += self.data[_cols.round().astype(int)-1, _rows.round().astype(int)-1] * stdnorm(i, w)
             
             col_min = cols - vec_perp[0]*w*2
             col_max = cols + vec_perp[0]*w*2
@@ -127,7 +127,7 @@ class LineCut:
             y0min, y1min = row_min[[0,-1]].round().astype(int)
             y0max, y1max = row_max[[0,-1]].round().astype(int)
         else:
-            zi = self.data[cols.round().astype(np.int), rows.round().astype(np.int)]
+            zi = self.data[cols.round().astype(int), rows.round().astype(int)]
         # Extract the values along the line, using cubic interpolation:
         #import scipy.ndimage
         #zi = scipy.ndimage.map_coordinates(self.data, np.vstack((x,y)))

@@ -176,16 +176,19 @@ class RASXfile(object):
             if verbose:
                 print()
 
-        data = np.array(data)
+        self._ndscan = len(np.unique(list(map(len, data))))==1
+        if self._ndscan:
+            data = np.array(data)
         imgdata = np.array(imgdata)
 
         self.data = data
         self.images = imgdata
         self.meta = meta
-        self.positions = collections.defaultdict(list)
+        self.units = dict()
         for mdata in meta:
             for axis in mdata["Axes"].values():
                 self.positions[axis.Name].append(axis.Position)
+                self.units[axis.Name] = axis.Unit
         for axis in self.positions:
             if len(set(self.positions[axis])) == 1:
                 self.positions[axis] = self.positions[axis][0]

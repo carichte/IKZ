@@ -184,6 +184,7 @@ class RASXfile(object):
         self.data = data
         self.images = imgdata
         self.meta = meta
+        self.positions = collections.defaultdict(list)
         self.units = dict()
         for mdata in meta:
             for axis in mdata["Axes"].values():

@@ -1,6 +1,6 @@
 import collections
 import xrayutilities as xu
-
+from xrayutilities import experiment
 
 class EmptyGeometry(object):
     """
@@ -34,7 +34,7 @@ class EmptyGeometry(object):
         sample_ax = [ax for (mot, ax) in self.sample_rot.items() if mot in self.usemotors]
         detector_ax = [ax for (mot, ax) in self.detector_rot.items() if mot in self.usemotors]
 
-        qc = xu.experiment.QConversion(sample_ax, detector_ax, inc_beam)
+        qc = experiment.QConversion(sample_ax, detector_ax, inc_beam)
         return qc
     
     def set_offsets(self, **kwargs):

@@ -205,7 +205,8 @@ class ROIselector(object):
         self.clrbutton.on_click(self.clear_rois)
 
         self.rect = RectangleSelector(self.ax, lambda : None,
-                                      drawtype='box', useblit=True,
+                                      # drawtype='box', 
+                                      useblit=True,
                                       button=[1, 3],  # don't use middle button
                                       minspanx=5, minspany=5,
                                       spancoords='pixels',
